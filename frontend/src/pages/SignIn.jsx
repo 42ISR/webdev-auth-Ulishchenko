@@ -1,13 +1,34 @@
 import { useState } from "react"
 import Button from "../components/Button"
 import Input from "../components/Input"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { api } from "../api/api"
+import { useUserStore } from "../store/useUserStore"
 
 const SignIn = () => {
     const [error, setError] = useState("")
+    const navigate = useNavigate()
+    const { setUser } = useUserStore()
 
-    const handleSubmit = () => {}
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        setError("")
 
+        const user = {
+            username:e.target.username.value,
+            password: e.target.password.value,
+        }
+
+        try {
+            const data = await api.loginUser(user)
+            setUser(data.data)
+            console.log(data)
+                navigate("/")
+        } catch (error) {
+            console.error(error)
+            setError(error.response.data.error)
+        }
+    }
     return (
         <div className="auth-page">
             <div className="auth-container">
@@ -26,6 +47,7 @@ const SignIn = () => {
                         id="password"
                         name="password"
                         type="password"
+                        minLength="6"
                         label="Пароль"
                         required
                         placeholder="Введите пароль"
